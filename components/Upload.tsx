@@ -4,7 +4,7 @@ import {
   REDIRECT_DELAY_MS,
 } from "lib/constants";
 import { CheckCircle2, ImageIcon, UploadIcon } from "lucide-react";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useOutletContext } from "react-router";
 
 interface UploadProps {
@@ -16,7 +16,24 @@ const Upload = ({ onComplete }: UploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  // To clear setinterval and timeout if the user goes away before loading image
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const { isSignedIn } = useOutletContext<AuthContext>();
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, []);
 
   const processFile = useCallback(
     (file: File) => {
@@ -26,17 +43,30 @@ const Upload = ({ onComplete }: UploadProps) => {
       setProgress(0);
 
       const reader = new FileReader();
+      // If the file couldn't load due to an error
+      reader.onerror = () => {
+        setFile(null);
+        setProgress(0);
+      };
+
       reader.onloadend = () => {
         const base64Data = reader.result as string;
 
-        const interval = setInterval(() => {
+        intervalRef.current = setInterval(() => {
           setProgress((prev) => {
             const next = prev + PROGRESS_INCREMENT;
 
             if (next >= 100) {
-              clearInterval(interval);
-              setTimeout(() => {
+              // clearInterval(interval);
+
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+              }
+
+              timeoutRef.current = setTimeout(() => {
                 onComplete?.(base64Data);
+                timeoutRef.current = null;
               }, REDIRECT_DELAY_MS);
               return 100;
             }
@@ -66,7 +96,8 @@ const Upload = ({ onComplete }: UploadProps) => {
     if (!isSignedIn) return;
 
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && droppedFile.type.startsWith("image/")) {
+    const allowedFileTypes = ["image/jpeg", "image/png", "image/jpg"];
+    if (droppedFile && allowedFileTypes.includes(droppedFile.type)) {
       processFile(droppedFile);
     }
   };
