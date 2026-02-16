@@ -2,6 +2,7 @@ import Navbar from "components/Navbar";
 import type { Route } from "./+types/home";
 import { ArrowRight, ArrowUpRight, Clock, Layers } from "lucide-react";
 import Button from "components/ui/Button";
+import Upload from "components/Upload";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -55,7 +56,12 @@ export default function Home() {
               <p>Supports JPG, PNG formats upto 10MB</p>
             </div>
 
-            <p>Upload Images</p>
+            <Upload
+              onComplete={(base64Data) => {
+                console.log("Upload Complete: ", base64Data);
+                // Handle redirection steps
+              }}
+            />
           </div>
         </div>
       </section>
