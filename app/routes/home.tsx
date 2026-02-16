@@ -3,6 +3,7 @@ import type { Route } from "./+types/home";
 import { ArrowRight, ArrowUpRight, Clock, Layers } from "lucide-react";
 import Button from "components/ui/Button";
 import Upload from "components/Upload";
+import { useNavigate } from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -12,6 +13,14 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
+  const navigate = useNavigate();
+
+  const handleUploadComplete = async (base64Image: string) => {
+    const newId = Date.now().toString(); // A simple way to create a new id as the date will never be repeated in real time
+
+    navigate(`/visualizer/${newId}`);
+    return true;
+  };
   return (
     <div className="home">
       <Navbar />
@@ -57,10 +66,12 @@ export default function Home() {
             </div>
 
             <Upload
-              onComplete={(base64Data) => {
-                console.log("Upload Complete: ", base64Data);
-                // Handle redirection steps
-              }}
+              // onComplete={(base64Data) => {
+              //   console.log("Upload Complete: ", base64Data);
+              //   // Handle redirection steps - to visualization page
+              // }}
+
+              onComplete={handleUploadComplete}
             />
           </div>
         </div>
