@@ -10,7 +10,6 @@ import {
   imageUrlToPngBlob,
   isHostedUrl,
 } from "./utils";
-import { text } from "stream/consumers";
 
 type HostingConfig = { subdomain: string };
 type HostedAsset = { url: string };
@@ -30,8 +29,10 @@ export const getOrCreateHostingConfig =
 
     try {
       const created = await puter.hosting.create(subdomain, ".");
-
+      
+      // Saving the subdomain into puter database
       const record = { subdomain: created.subdomain };
+      await puter.kv.set(HOSTING_CONFIG_KEY, record);
 
       return record;
     } catch (error) {
@@ -65,10 +66,10 @@ export const uploadImageToHosting = async ({
       "";
     const imageExt = getImageExtension(contentType, url);
     const dir = `projects/${projectId}`;
-    const filePath = `${dir}/${label}.${text}`;
+    const filePath = `${dir}/${label}.${imageExt}`;
     const uploadFile = new File(
       [resolvedTransformation.blob],
-      `${label}.${text}`,
+      `${label}.${imageExt}`,
       {
         type: contentType,
       },
