@@ -63,7 +63,6 @@ export default function Home() {
   useEffect(() => {
     const fetchProjects = async () => {
       const items = await getProjects();
-
       setProjects(items);
     };
     fetchProjects();
@@ -140,9 +139,9 @@ export default function Home() {
           {/* Projects Overview Section */}
           <div className="projects-grid">
             {projects.map(
-              ({ id, name, renderedImage, sourceImage, timestamp }) => (
+              ({ id, name, renderedImage, sourceImage, timestamp }, index) => (
                 <div
-                  key={id}
+                  key={id ?? index}
                   className="project-card group"
                   onClick={() => navigate(`/visualizer/${id}`)}
                 >
