@@ -148,13 +148,29 @@ export const getProjectById = async ({ id }: { id: string }) => {
     console.log("Fetch project response:", response);
 
     if (!response.ok) {
-      console.error("Failed to fetch project:", await response.text());
+      const errorText = await response.text();
+      console.error("Failed to fetch project:", errorText);
       return null;
     }
 
-    const data = (await response.json()) as {
-      project?: DesignItem | null;
-    };
+    const responseText = await response.text();
+    console.log("Raw response text:", responseText);
+
+    if (!responseText.trim()) {
+      console.error("Empty response received");
+      return null;
+    }
+
+    let data;
+    try {
+      data = JSON.parse(responseText) as {
+        project?: DesignItem | null;
+      };
+    } catch (parseError) {
+      console.error("Failed to parse JSON response:", parseError);
+      console.error("Response text was:", responseText);
+      return null;
+    }
 
     console.log("Fetched project data:", data);
 
