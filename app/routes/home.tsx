@@ -63,6 +63,12 @@ export default function Home() {
   useEffect(() => {
     const fetchProjects = async () => {
       const items = await getProjects();
+      // -- DEBUG: Uncomment to inspect fetched project data --
+      // console.log("[DEBUG] Fetched projects count:", items.length);
+      // if (items.length > 0) {
+      //   console.log("[DEBUG] First project keys:", Object.keys(items[0]));
+      //   console.log("[DEBUG] First project:", JSON.stringify(items[0], null, 2));
+      // }
       setProjects(items);
     };
     fetchProjects();
